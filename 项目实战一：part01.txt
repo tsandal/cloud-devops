@@ -1,0 +1,235 @@
+Top
+NSD PROJECT1 DAY01
+
+案例1：交换机基本命令模式
+案例2：交换机基本命令
+案例3：交换机基本配置
+1 案例1：交换机基本命令模式
+1.1 问题
+
+本例要求熟练掌握交换机每个模式的配置命令
+对于思科交换机来说，主要有2种配置途径：其一，使用交换机自带的Console线缆连接到计算机的COM口，然后利用计算机的超级终端软件直接配置，首次配置通常使用这种方式；其二，通过telnet方式远程访问、配置交换机，这种方式要求此交换机已配置有IP地址且已接入计算机网络，后续课程会学习此访问方式。
+1）通过超级终端访问交换机
+2）交换机工作模式的进入与退出
+真实设备环境，如图-1所示。
+
+图-1
+1.2 方案
+
+本例中的配置练习可采用思科模拟器 —— Cisco Packet Tracer 6.2来实现。
+1）安装Packet Tracer 6.2
+双击安装包执行默认安装，然后将中文语言文件Chinese.ptl解压到安装目录下的多语言文件夹，比如C:\Program Files (x86)\Cisco Packet Tracer 6.0\languages。
+双击桌面的Cisco Packet Tracer快捷方式以启动程序，打开菜单“Options”-->“Preferences”-->切换到“Interface”选项卡-->选择下方的Chinese.ptl-->单击右下角“Change Language”按钮，弹出提示时单击“OK”，如图-2所示。
+
+图－2
+关闭当前Packet Tracer程序，然后再重新启动此程序，可发现已经变成中文语言界面了（当前汉化的还不完整），如图-3所示。
+
+图－3
+2）建立实验网络拓扑
+在Packet Tracer程序主窗口中，添加一台Cisco 2960交换机、一台普通PC机，并添加Console连接、直通网线连接，如图-4所示，确认完毕后将当前拓扑结构保存为c2960-pc.pkt文件。
+
+图－4
+其中，连接细节如下：
+交换机的Console口 <--> PC机的RS 232串口。
+交换机的FastEthernet0/24接口 <--> PC机的FastEthernet0网卡。
+1.3 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：通过超级终端访问交换机。
+
+1）配置并打开超级终端
+在此前建立的Packet Tracer实验拓扑环境中，单击PC机以打开此设备，确认电源已启动（机箱示意图上的指示灯为黄绿色），切换到“桌面选项卡”，如图-5所示，找到其中的“终端”并单击打开。
+
+图－5
+在弹出的终端配置窗口中，如图-6所示，单击“确定”以接受默认值。
+
+图－6
+接下来就可以看到“终端”窗口了，其中显示了通过Console线连接的交换机初始化信息，回车后可进入交换机的“Switch>”配置系统，如图-7所示。
+
+图－7
+提示：在Packet Tracer环境中，可直接单击交换机图标，然后切换到“命令行”选项卡，也可以进入IOS配置环境。
+步骤二：交换机工作模式的进入与退出
+
+1) 交换机工作模式的进入如下：
+Switch>enable   //切换为特权模式
+Switch# configure terminal      //进入全局配置模式
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#interface fastEthernet 0/1      //进入接口模式
+Switch(config-if)#
+2）交换机工作模式的退出下：
+Switch(config-if)#exit                           //接口模式退到全局配置模式
+Switch(config)#exit                              //全局配置模式退到特权模式
+Switch#exit                                       //特权模式退到用户模式
+Switch>
+注：exit 返回上一模式
+end 从接口或者全局配置模式回到特权模式，快捷键Ctrl+z同等效果
+思科设备命令行不区分大小写，与Linux命令行不同
+命令输入错误卡住时同时按键盘ctrl+shift+6这三个键即可
+2 案例2：交换机基本命令
+2.1 问题
+
+修改及查看交换机配置
+1)修改交换机主机名
+2)查看交换机配置信息
+2.2 方案
+
+在Packet Tracer程序主窗口中，添加一台Cisco 2960交换机，进入交换机，输入相关命令进行配置和查看交换机
+2.3 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：修改交换机主机名
+
+进入全局配置模式后，使用hostname指令可以为交换机设置主机名。例如，以下操作可以将主机名设置为s1：
+Switch(config)# hostname s1                     //配置主机名
+s1(config)#    
+步骤二：查看交换机配置信息
+
+查看交换机当前的运行配置：
+查看交换机当前的运行配置：
+s1# show running-config                  //查看当前的运行配置
+Building configuration...
+Current configuration : 1052 bytes
+!
+version 12.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname sw1                          //已配置主机名
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+!
+interface FastEthernet0/4
+!
+interface FastEthernet0/5
+!
+interface FastEthernet0/6
+!
+interface FastEthernet0/7
+!
+interface FastEthernet0/8
+!
+interface FastEthernet0/9
+!
+interface FastEthernet0/10
+!
+interface FastEthernet0/11
+!
+interface FastEthernet0/12
+!
+interface FastEthernet0/13
+!
+interface FastEthernet0/14
+!
+interface FastEthernet0/15
+!
+interface FastEthernet0/16
+!
+interface FastEthernet0/17
+!
+interface FastEthernet0/18
+!
+interface FastEthernet0/19
+!
+interface FastEthernet0/20
+!
+interface FastEthernet0/21
+!
+interface FastEthernet0/22
+!
+interface FastEthernet0/23
+!
+interface FastEthernet0/24
+!
+interface GigabitEthernet1/1
+!
+interface GigabitEthernet1/2
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+!
+line con 0
+!
+line vty 0 4
+ login
+line vty 5 15
+ login
+!
+!
+end
+sw1#
+步骤三：查看IOS名称以及版本信息
+
+查看ios名称及版本信息
+
+s1#show version 
+Cisco Internetwork Operating System Software
+IOS (tm) C2950 Software (C2950-I6Q4L2-M), Version 12.1(22)EA4, RELEASE   SOFTWARE(fc1)
+Copyright (c) 1986-2005 by cisco Systems, Inc.
+Compiled Wed 18-May-05 22:31 by jharirba
+Image text-base: 0x80010000, data-base: 0x80562000
+ROM: Bootstrap program is is C2950 boot loader
+Switch uptime is 1 minutes, 39 seconds
+System returned to ROM by power-on
+Cisco WS-C2950-24 (RC32300) processor (revision C0) with 21039K bytes of memory.
+Processor board ID FHK0610Z0WC
+Last reset from system-reset
+Running Standard Image
+24 FastEthernet/IEEE 802.3 interface(s)
+63488K bytes of flash-simulated non-volatile configuration memory.
+Base ethernet MAC Address: 00E0.B026.B88C
+Motherboard assembly number: 73-5781-09 
+Power supply part number: 34-0965-01
+Motherboard serial number: FOC061004SZ
+Power supply serial number: DAB0609127D
+Model revision number: C0
+Motherboard revision number: A0
+Model number: WS-C2950-24
+System serial number: FHK0610Z0WC
+Configuration register is 0xF
+3 案例3：交换机基本配置
+3.1 问题
+
+配置交换机实现以下目的
+3.2 方案
+
+实现此案例需要按照如下步骤进行。
+3.3 步骤
+
+步骤一：交换机密码配置
+
+1）为交换机配置特权密码Taren1
+打开交换机命令行配置界面
+Switch>en
+Switch#conf t
+Switch(config)#enable password Taren1
+步骤二：保存配置并重启设备检测密码可用情况
+
+Switch(config)#exit
+Switch#write
+Switch#reload
+……….
+………
+Switch>enable
+Password:                            //此时需要输入密码才能进入特权模式
+步骤三：清空设备配置
+
+Switch#erase startup-config
+Erasing the nvram filesystem will remove all configuration files! Continue? [confirm]         //此时系统询问是否确定删除，按回车即可
+[OK]
+Erase of nvram: complete
+步骤四：重启设备检测配置状况
+
+Switch#reload
+Proceed with reload? [confirm]      //此时系统询问是否确定重启，按回车即可

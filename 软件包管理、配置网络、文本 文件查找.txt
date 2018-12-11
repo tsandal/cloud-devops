@@ -1,0 +1,271 @@
+Top
+NSD ADMIN DAY04
+
+案例1：使用yum软件源
+案例2：升级Linux内核
+案例3：配置静态网络地址
+案例4：查找并处理文件
+案例5：查找并提取文件内容
+1 案例1：使用yum软件源
+1.1 问题
+
+本例要求为虚拟机 server0指定可用的yum软件源，相关要求如下：
+YUM软件库源为 http://content.example.com/rhel7.0/x86_64/dvd
+将此配置为虚拟机 server0 的默认软件仓库
+1.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：检查现有yum仓库，去除不可用的设置
+
+1）列出yum库
+[root@server0 ~]# yum  repolist  
+已加载插件：langpacks
+rhel_dvd                                                    | 4.1 kB  00:00:00     
+(1/2): rhel_dvd/group_gz                                    | 134 kB  00:00:00     
+(2/2): rhel_dvd/primary_db                                  | 3.4 MB  00:00:00     
+源标识                       源名称                                           状态
+rhel_dvd                     Remote classroom copy of dvd                     4,305
+repolist: 4,305
+2）移除不可用的yum库配置文件
+当执行yum repolist操作报错时，才执行此步骤（否则此步可跳过）。
+[root@server0 ~]# mkdir  /etc/yum.repos.d/repobak
+[root@server0 ~]# mv  /etc/yum.repos.d/*.repo  /etc/yum.repos.d/repobak/
+步骤二：添加指定的yum仓库配置
+
+1）使用yum-config-manager工具建立新配置文件
+[root@server0 ~]# yum-config-manager  --add-repo  http://content.example.com/rhel7.0/x86_64/dvd 
+已加载插件：langpacks
+adding repo from: http://content.example.com/rhel7.0/x86_64/dvd
+[content.example.com_rhel7.0_x86_64_dvd]
+name=added from: http://content.example.com/rhel7.0/x86_64/dvd
+baseurl=http://content.example.com/rhel7.0/x86_64/dvd
+enabled=1
+2）修改新建的仓库配置，添加gpgcheck=0以禁用GPG签名检查
+[root@server0 ~]# vim  /etc/yum.repos.d/content.example.com_rhel7.0_x86_64_dvd
+[content.example.com_rhel7.0_x86_64_dvd]
+name=added from: http://content.example.com/rhel7.0/x86_64/dvd
+baseurl=http://content.example.com/rhel7.0/x86_64/dvd
+enabled=1
+gpgcheck=0 
+步骤三：确认新配置的yum源可用
+
+[root@server0 ~]# yum  clean  all                          //清理缓存
+已加载插件：langpacks
+正在清理软件源： content.example.com_rhel7.0_x86_64_dvd
+Cleaning up everything
+[root@server0 ~]# yum  repolist                          //重新列出可用的源
+已加载插件：langpacks
+content.example.com_rhel7.0_x86_64_dvd                      | 4.1 kB  00:00:00     
+(1/2): content.example.com_rhel7.0_x86_64_dvd/group_gz      | 134 kB  00:00:00     
+(2/2): content.example.com_rhel7.0_x86_64_dvd/primary_db    | 3.4 MB  00:00:00     
+源标识                                 源名称                                 状态
+content.example.com_rhel7.0_x86_64_dvd added from: http://content.example.com 4,305
+repolist: 4,305
+2 案例2：升级Linux内核
+2.1 问题
+
+本例要求为虚拟机 server0安装升级版的新内核：
+新版本的内核安装文件可以从以下地址获取：
+http://classroom/content/rhel7.0/x86_64/errata/Packages/
+升级内核，并满足下列要求：当系统重新启动后，升级的新内核应该作为默认内核；原来的内核要被保留，并且仍然可以正常启动
+2.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：下载新版内核的安装文件
+
+1）确认新版内核的下载地址
+如果给定的下载地址中未包含kernel-...rpm文件路径，则打开firefox浏览器，访问指定的网址（如图-5所示）。
+
+图-5
+在打开的网页上找到需要的内核文件，右击对应的链接，选择“Copy Link Location”复制下载地址（如图-6所示）。
+
+图-6
+2）下载新版内核安装文件
+根据前一步获取到的内核下载地址，使用wget命令下载：
+[root@server0 ~]# wget  http://classroom/content/rhel7.0/x86_64/errata/Packages/kernel-3.10.0-123.1.2.el7.x86_64.rpm
+--2016-12-23 22:13:47--  http://classroom/content/rhel7.0/x86_64/errata/Packages/kernel-3.10.0-123.1.2.el7.x86_64.rpm
+正在解析主机 classroom (classroom)... 172.25.254.254
+正在连接 classroom (classroom)|172.25.254.254|:80... 已连接。
+已发出 HTTP 请求，正在等待回应... 200 OK
+长度：30266784 (29M) [application/x-rpm]
+正在保存至: “kernel-3.10.0-123.1.2.el7.x86_64.rpm”
+100%[=========================================>] 30,266,784  40.4MB/s 用时 0.7s   
+2016-12-23 22:13:47 (40.4 MB/s) - 已保存 “kernel-3.10.0-123.1.2.el7.x86_64.rpm” [30266784/30266784])
+[root@server0 ~]# ls  -lh  kernel-*.rpm                  //确认下载结果
+-rw-r--r--. 1 root root 29M 6月  11 2014 kernel-3.10.0-123.1.2.el7.x86_64.rpm
+步骤二：安装新版内核
+
+Linux系统支持安装多个不同版本的内核，开机引导时可以选择使用哪个版本。因此只需要正常安装新版内核即可。
+1）查看现有内核版本
+[root@server0 ~]# uname  -r
+3.10.0-123.el7.x86_64
+2）安装新版本内核
+[root@server0 ~]# rpm  -ivh  kernel-3.10.0-123.1.2.el7.x86_64.rpm
+警告：kernel-3.10.0-123.1.2.el7.x86_64.rpm: 头V3 RSA/SHA256 Signature, 密钥 ID fd431d51: NOKEY
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:kernel-3.10.0-123.1.2.el7        ################################# [100%]
+                                          //此处需耐心等待，千万别强行终止
+[root@server0 ~]# 
+步骤三：确认新内核版本
+
+1）重启系统
+[root@server0 ~]# reboot
+.. ..
+2）登入系统，确认使用的内核已是新版本
+[root@server0 ~]# uname  -r
+3.10.0-123.1.2.el7.x86_64
+3 案例3：配置静态网络地址
+3.1 问题
+
+本例要求为虚拟机 server 配置以下静态地址参数：
+主机名：server0.example.com
+IP地址：172.25.0.11
+子网掩码：255.255.255.0
+默认网关：172.25.0.254
+DNS服务器：172.25.254.254
+3.2 方案
+
+使用nmcli配置网络连接时的基本操作，
+查看网络连接、连接详情：
+nmcli con show
+nmcli con show "连接名"
+修改网络连接参数：
+nmcli con modify "连接名" ipv4.method auto|manual
+nmcli con modify "连接名" ipv4.addresses "IP地址/掩码长度 [默认网关]" ipv4.dns DNS服务器地址
+nmcli con modify "连接名"	connection.autoconnect yes|no
+3.3 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：配置固定主机名
+
+1）配置前， 检查是否设置静态主机名
+[root@server0 ~]# hostnamectl 
+   Static hostname: n/a                         //未设置静态主机名
+Transient hostname: server0.example.com
+2）设置为指定的主机名
+[root@server0 ~]# vim  /etc/hostname              //建立主机名配置文件
+server0.example.com 
+3）配置后，检查结果
+[root@server0 ~]# hostnamectl 
+   Static hostname: server0.example.com          //已设置静态主机名
+         Icon name: computer
+.. ..
+步骤二：配置静态IP地址参数
+
+1）查看当前主机的网卡设备、网络连接
+[root@server0 ~]# nmcli  connection   show
+名称         UUID                                  类型            设备 
+System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0
+2）修改连接“System eth0”的配置
+将配置方式指定为manual，指定IP地址、默认网关、DNS地址，并配置自动连接：
+[root@server0 ~]# nmcli  connection  modify  "System eth0"  ipv4.method  manual  ipv4.addresses  "172.25.0.11/24  172.25.0.254"  ipv4.dns  172.25.254.254  connection.autoconnect  yes
+3）重新激活连接“System eth0”
+通过up指令激活连接配置，必要时也可以先down再up：
+[root@server0 ~]# nmcli  connection  up  "System eth0"          //激活连接
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/1)
+确保系统服务NetworkManager开机自启：
+[root@server0 ~]# systemctl  restart  NetworkManager
+[root@server0 ~]# systemctl  enable  NetworkManager
+4）检查修改结果，确认无误
+检查IP地址：
+[root@server0 ~]# ifconfig  eth0
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.11  netmask 255.255.255.0  broadcast 172.25.0.255
+        inet6 fe80::5054:ff:fe00:b  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:00:00:0b  txqueuelen 1000  (Ethernet)
+        RX packets 1394  bytes 138855 (135.6 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 944  bytes 98495 (96.1 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+检查默认网关地址：
+[root@server0 ~]# route  -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         172.25.0.254    0.0.0.0         UG    1024   0        0 eth0
+172.25.0.0      0.0.0.0         255.255.255.0   U     0      0        0 eth0
+检查DNS服务器地址：
+[root@server0 ~]# cat  /etc/resolv.conf 
+# Generated by NetworkManager
+search example.com
+nameserver 172.25.254.254
+如果在使用nmcli修改网络连接时并未指定ipv4.dns，也可以直接修改DNS客户端配置文件/etc/resolv.conf，确保添加有上述记录即可。
+步骤三：验证网络配置结果
+
+通过ssh远程访问server0：
+[root@room9pc13 ~]# ssh -X root@server0.example.com
+Warning: Permanently added 'server0.example.com' (ECDSA) to the list of known hosts.
+Last login: Fri Dec 23 19:00:12 2016 from 172.25.0.250
+[root@server0 ~]# hostname                             //确认自己的主机名
+server0.example.com
+在虚拟机server0上，可以查询server0、desktop0、content等站点：
+[root@server0 ~]# host  server0.example.com
+server0.example.com has address 172.25.0.11
+[root@server0 ~]# host  desktop0.example.com
+desktop0.example.com has address 172.25.0.10
+desktop0.example.com mail is handled by 10 smtp0.example.com.
+[root@server0 ~]# host  content.example.com
+content.example.com has address 172.25.254.254
+4 案例4：查找并处理文件
+4.1 问题
+
+本例要求采用不少于两种方法完成以下任务：
+找出所有用户 student 拥有的文件
+把它们拷贝到 /root/findfiles/ 文件夹中
+4.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：确认能找到指定的文件
+
+1）确认新版内核的下载地址
+[root@server0 ~]# find  /  -user  student  -type f  
+find: ‘/proc/1853/task/1853/fdinfo/6’: 没有那个文件或目录
+find: ‘/proc/1853/fdinfo/6’: 没有那个文件或目录
+/var/spool/mail/student
+/home/student/.bash_logout
+/home/student/.bash_profile
+/home/student/.bashrc
+/home/student/.ssh/authorized_keys
+/home/student/.config/gnome-initial-setup-done
+/home/student/.config/monitors.xml
+对于上述操作中出现的/proc信息忽略即可。
+步骤二：处理找到的文件
+
+1）创建目标文件夹
+[root@server0 ~]# mkdir  /root/findfiles
+2）拷贝找到的文件到目标文件夹
+以下两种方法任选一种：
+[root@server0 ~]# find  /  -user  student  -type f  -exec  cp  -p  {}  /root/findfiles/  \;
+.. ..
+或者
+[root@server0 ~]# \cp  -p  $(find  /  -user  student  -type f)  /root/findfiles/
+.. ..
+3）确认拷贝结果
+[root@server0 ~]# ls  -lhA  /root/findfiles/
+总用量 24K
+-rw-------. 1 student student 1.7K 7月  11 2014 authorized_keys
+-rw-r--r--. 1 student student   18 1月  29 2014 .bash_logout
+-rw-r--r--. 1 student student  193 1月  29 2014 .bash_profile
+-rw-r--r--. 1 student student  231 1月  29 2014 .bashrc
+-rw-r--r--. 1 student student    4 7月  11 2014 gnome-initial-setup-done
+-rw-r--r--. 1 student student 1.5K 7月  11 2014 monitors.xml
+-rw-rw----. 1 student mail       0 7月  11 2014 student
+5 案例5：查找并提取文件内容
+5.1 问题
+
+本例要求在文件/usr/share/dict/words中查找到所有包含字符串seismic的行，并满足下列要求：
+将找到的行按原文顺序拷贝到 /root/wordlist 文件中
+文件 /root/wordlist 不要包含空行，并且其中所有行的内容必须是 /usr/share/dict/words 文件中原始行的准确副本
+5.2 步骤
+
+实现此案例需要按照如下步骤进行。
+1）使用grep命令查找指定的关键词，并通过重定向输出保存到指定的文件：
+[root@serverX ~]# grep  'seismic'  /usr/share/dict/words  >  /root/wordlist
+2）确认提取结果
+[root@server0 ~]# cat /root/wordlist 
+anaseismic
+antiseismic
+aseismic
+aseismicity
+bradyseismic
+.. ..

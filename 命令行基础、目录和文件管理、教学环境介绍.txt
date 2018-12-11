@@ -1,0 +1,186 @@
+Top
+NSD ADMIN DAY03
+
+案例1：命令行基础技巧
+案例2：挂载并访问光盘设备
+案例3：ls列表及文档创建
+案例4：复制、删除、移动
+案例5：访问练习用虚拟机
+1 案例1：命令行基础技巧
+1.1 问题
+
+本例要求掌握Linux命令行环境的基本操作，完成下列任务：
+利用Tab键快速找出下列文件：/etc/sysconfig/network-scripts/ifcfg-*、/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+练习以下快捷编辑操作：Ctrl + l、Ctrl + u、Ctrl + w；Ctrl + c、Esc + .
+1.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：利用Tab键快速补全文档路径
+
+1）找出现有的网络连接配置文件
+[root@server0 ~]# ls /etc/sysco<TAB>
+[root@server0 ~]# ls /etc/sysconfig/netw<TAB>
+[root@server0 ~]# ls /etc/sysconfig/network-s<TAB>
+[root@server0 ~]# ls /etc/sysconfig/network-scripts/ifc<TAB>
+[root@server0 ~]# ls /etc/sysconfig/network-scripts/ifcfg-<TAB><TAB>
+ifcfg-br0          ifcfg-br1          ifcfg-lo
+ifcfg-br0:253      ifcfg-eno16777736
+2）找出RHEL7校验软件包的密钥文件
+[root@server0 ~]# ls /etc/pki/rp<TAB>
+[root@server0 ~]# ls /etc/pki/rpm-gpg/RP<TAB>
+[root@server0 ~]# ls /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-r<TAB>
+[root@server0 ~]# ls /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+步骤二：练习以下快捷编辑操作
+
+1）清理编辑的命令行
+快速清屏：Ctrl + l
+从当前光标处删除到行首：Ctrl + u
+从当前光标处往前删除一个单词：Ctrl + w
+2）放弃编辑的命令行
+中止当前命令行：Ctrl + c
+3）参数复用
+在当前光标处粘贴上一条命令行的最后一个参数：Esc + .
+2 案例2：挂载并访问光盘设备
+2.1 问题
+
+本例要求学会mount挂载操作。主要完成下列任务：
+连接光盘 /ISO/rhel-server-7.4-x86_64-dvd.iso
+将光盘挂载到 /mnt 目录，检查 /mnt 目录内容
+卸载光盘设备，再次检查目录内容
+2.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：使用ls命令列出指定的文件
+
+1）连接光盘 /ISO/rhel-server-7.4-x86_64-dvd.iso
+[root@server0 ~]# mount  /dev/cdrom  /mnt     //挂载设备
+mount: /dev/sr0 写保护，将以只读方式挂载
+2）将光盘挂载到 /mnt 目录，检查 /mnt 目录内容
+[root@server0 ~]# ls  /mnt                 //访问设备内容
+addons  images      Packages         RPM-GPG-KEY-redhat-release
+EFI     isolinux    release-notes    TRANS.TBL
+EULA    LiveOS      repodata
+GPL     media.repo  RPM-GPG-KEY-redhat-beta
+3）卸载光盘设备，再次检查目录内容
+[root@server0 ~]# umount  /mnt/dvd         //卸载设备
+mount: /dev/sr0 写保护，将以只读方式挂载
+[root@server0 ~]# ls  /mnt/dvd              //确认结果
+[root@server0 ~]# 
+3 案例3：ls列表及文档创建
+3.1 问题
+
+本例要求学会列表查看目录内容、新建文档相关技能，并熟悉通配符机制的应用。主要完成下列任务：
+使用ls命令列出指定的文件：/etc/目录下以re开头.conf结尾的文件、/dev/目录下编号是个位数的tty控制台设备
+一条命令创建文件夹 /protected/project/tts10
+使用 vim 创建文件 /etc/hostname，编写一行内容：svr7.tedu.cn
+3.2 方案
+
+对于通配符使用，需理解每个通配符的作用：
+*：任意多个任意字符
+?：单个字符
+[a-z]：多个字符或连续范围中的一个，若无则忽略
+{a,min,xy}：多组不同的字符串，全匹配
+vim是Linux系统上最常用的命令行交互式文本编辑器，主要工作在三种模式：命令模式、输入模式、末行模式。
+通过vim打开一个文件时，默认处于命令模式；从命令模式按i键可以进入编辑状态，按Esc键返回命令模式；从命令模式输入冒号:可以进入末行模式，在末行模式下主要执行存盘、退出等基本操作。
+3.3 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：使用ls命令列出指定的文件
+
+1）列出/etc/目录下以re开头.conf结尾的文件
+使用通配符 * 代替未知的字符串。
+[root@server0 ~]# ls /etc/re*.conf
+/etc/request-key.conf  /etc/resolv.conf
+2）列出/dev/目录下编号是个位数的tty控制台设备
+使用通配符 ? 代替单个未知的字符。
+[root@server0 ~]# ls /dev/tty?
+/dev/tty0  /dev/tty2  /dev/tty4  /dev/tty6  /dev/tty8
+/dev/tty1  /dev/tty3  /dev/tty5  /dev/tty7  /dev/tty9
+或者更严谨一些，使用 [0-9] 代替单个数字。
+[root@server0 ~]# ls /dev/tty[0-9]
+/dev/tty0  /dev/tty2  /dev/tty4  /dev/tty6  /dev/tty8
+/dev/tty1  /dev/tty3  /dev/tty5  /dev/tty7  /dev/tty9
+步骤二：新建文档
+
+1）使用mkdir新建文件夹
+[root@server0 ~]# mkdir -p /protected/project/tts10
+[root@server0 ~]# ls -ld /protected/project/tts10/
+drwxr-xr-x. 2 root root 6 Aug 30 10:11 /protected/project/tts10/
+2）使用vim新建或修改文本文件
+[root@server0 ~]# vim /etc/hostname
+//按i键进入编辑模式
+//将文本内容修改为 svr7.tedu.cn
+//按Esc键返回命令模式
+//输入:wq保存修改并退出vim编辑器
+[root@server0 ~]# cat /etc/hostname
+svr7.tedu.cn
+4 案例4：复制、删除、移动
+4.1 问题
+
+本例要求学会对文档进行复制、删除、移动/改名相关操作，依次完成下列任务：
+在当前目录下创建一个子目录 dir1
+将文件夹 /boot/grub2/ 复制到目录dir1下
+将目录 /root/ 下以 .cfg 结尾的文件复制到dir1下
+将文件 /etc/redhat-release复制到 /root/ 下，同时改名为 version.txt
+将文件 /root/version.txt 移动到dir1目录下
+删除 dir1 目录下的 grub2 子目录
+4.2 步骤
+
+实现此案例需要按照如下步骤进行。
+1）在当前目录下创建一个子目录 dir1
+[root@server0 ~]# mkdir dir1
+2）将文件夹 /boot/grub2/ 复制到目录dir1下
+[root@server0 ~]# cp -r /boot/grub2/ dir1/
+[root@server0 ~]# ls -ld dir1/*                                 //检查复制结果
+drwxr-xr-x. 6 root root 104 Aug 30 10:27 dir1/grub2
+3）将目录 /root/ 下以 .cfg 结尾的文件复制到dir1下
+[root@server0 ~]# cp /root/*.cfg dir1/
+[root@server0 ~]# ls -ld dir1/*                                 //检查复制结果
+-rw-------. 1 root root 16793 Aug 30 10:29 dir1/anaconda-ks.cfg
+drwxr-xr-x. 6 root root   104 Aug 30 10:27 dir1/grub2
+4）将文件 /etc/redhat-release复制到 /root/ 下，同时改名为 version.txt
+[root@server0 ~]# cp /etc/redhat-release /root/version.txt
+[root@server0 ~]# ls -ld /root/version.txt                  //检查复制结果
+-rw-r--r--. 1 root root 52 Aug 30 10:30 /root/version.txt
+5）将文件 /root/version.txt 移动到dir1目录下
+[root@server0 ~]# cp /root/version.txt dir1/
+[root@server0 ~]# ls -ld dir1/*                             //检查移动/改名结果
+-rw-------. 1 root root 16793 Aug 30 10:29 dir1/anaconda-ks.cfg
+drwxr-xr-x. 6 root root   104 Aug 30 10:27 dir1/grub2
+-rw-r--r--. 1 root root    52 Aug 30 10:31 dir1/version.txt
+6）删除 dir1 目录下的grub2子目录
+[root@server0 ~]# rm -rf dir1/grub2/
+[root@server0 ~]# ls -ld dir1/*                             //检查删除结果
+-rw-------. 1 root root 16793 Aug 30 10:29 dir1/anaconda-ks.cfg
+-rw-r--r--. 1 root root    52 Aug 30 10:31 dir1/version.txt
+5 案例5：访问练习用虚拟机
+5.1 问题
+
+学会在教学环境中访问练习用虚拟机，主要完成以下事项：
+快速重置教学虚拟机环境
+通过“虚拟系统管理器”访问虚拟机
+通过 ssh -X 远程访问 server 的命令行
+5.2 方案
+
+为了方便学员练习所学实验案例，教学环境的CentOS真机已经部署为基于KVM技术的虚拟化服务器，并且预先提供了3个虚拟机：server、desktop、classroom。
+5.3 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：快速重置教学虚拟机环境
+
+按照顺序先重置classroom，再依次重置server、desktop；如果只是做Linux管理员技术部分的练习，只需要重置classroom、server就可以。
+[root@room9pc13 ~]# rht-vmctl  reset  classroom          //先重置资源服务器
+[root@room9pc13 ~]# rht-vmctl  reset  server             //再重置练习用虚拟机
+[root@room9pc13 ~]# rht-vmctl  reset  desktop
+步骤二：通过“虚拟系统管理器”访问虚拟机
+
+这种方式的优势是，即使虚拟机的IP地址或防火墙配置有误，仍然可以访问；不足的地方是，比较占用系统资源、不方便传递文本信息（复制粘贴）。
+直接从桌面双击“虚拟系统管理器”图标，找到classroom、server等虚拟机，双击打开运行即可。
+步骤三：通过 ssh -X 远程登录到 server 的命令行
+
+重置过的练习环境已预先配置好网络，并且为从真机访问答题用虚拟机提前配置了SSH密钥验证，因此直接执行快速登录（ssh -X root@目标主机地址）即可。
+[root@room9pc13 ~]# ssh -X root@server0.example.com
+[root@server0 ~]# hostname
+server0.example.com
+注意ssh添加了-X选项（大写字母X），这是为了在执行远程主机的图形程序时，能够将图形界面在客户机上显示，方便用户操作。例如，连接到server0以后，运行对方的网卡配置工具nm-connection-editor，其程序窗口会直接显示在客户机的图形桌面上。

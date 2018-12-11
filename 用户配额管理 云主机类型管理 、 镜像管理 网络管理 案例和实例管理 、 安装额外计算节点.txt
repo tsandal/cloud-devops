@@ -1,0 +1,236 @@
+Top
+NSD CLOUD DAY03
+
+案例1：用户和配额管理
+案例2：新建云主机类型
+案例3：上传镜像
+案例4：创建网络
+案例5：管理浮动IP地址
+案例6：创建安全组及规则
+案例7：创建云主机
+案例8：安装额外计算节点
+1 案例1：用户和配额管理
+1.1 问题
+
+本案例要求：
+创建myproject项目
+通过Horizon创建user1用户
+通过CLI创建user2用户，练习相关用户管理命令
+通过Horizon和CLI对myproject进行配额调整
+1.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：创建项目
+
+1）创建myproject项目，如图-1所示：
+
+图-1
+2）通过Horizon创建user1用户，如图-2所示：
+
+图-2
+3）通过命令创建user2用户
+[root@openstack ~(keystone_admin)]# openstack user create  --password tedu.cn user2
+4）通过Horizon进行配额调整，如图-3所示：
+
+图-3
+2 案例2：新建云主机类型
+2.1 问题
+
+本案例要求通过命令和Horizon创建云主机类型：
+名字：m2.tiny
+ID：自动
+虚拟内核：1个
+内存：512M
+根磁盘：10GB
+临时磁盘和swap无要求
+2.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：新建云主机类型
+
+1）通过命令创建云主机类型
+[root@openstack ~(keystone_admin)]# openstack flavor create --public demo.tiny --id auto --ram 512 --disk 10 --vcpus 1
+2）通过Horizon创建云主机类型，如图-4所示：
+
+图-4
+3 案例3：上传镜像
+3.1 问题
+
+本案例要求上传一个镜像：
+将本机上的rhel6磁盘镜像文件small.img上传
+上传到Openstack的名称为small_rhel6
+设置镜像属性为public
+镜像最小磁盘大小为10GB，最小内存为512MB
+3.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：上传镜像，如图-5所示：
+
+
+图-5
+4 案例4：创建网络
+4.1 问题
+
+本案例要求：
+在myproject中创建两个网络，一个内网，用于连接实例，一个外网，用于对外通信
+创建一个路由器，将两个网络连接起来
+4.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：创建网络
+
+1）登陆admin用户，创建外网public，如图-6所示：
+
+图-6
+2）退出admin用户 ，登陆user1用户，创建public的子网wan，如图-7所示：
+
+图-7
+3）public外网不需要激活DHCP，如图-8所示：
+
+图-8
+4）创建内网lan，如图-9所示：
+
+图-9
+5）创建lan的子网，如图-10所示：
+
+图-10
+7）给内网分配地址池，如图-11所示：
+
+图-11
+8）新建路由，如图-12所示：
+
+图-12
+9）选择路由子网，如图-13所示：
+
+图-13
+5 案例5：管理浮动IP地址
+5.1 问题
+
+本案例要求：
+通过Horizon创建一个浮动IP地址
+通过命令行创建一个浮动IP地址
+5.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：创建浮动IP
+
+
+图-14
+6 案例6：创建安全组及规则
+6.1 问题
+
+本案例要求：
+新建一个安全组
+添加规则，允许任意主机可以通过SSH访问虚拟机实例
+添加规则，允许任意主机可以通过HTTPS访问虚拟机实例
+添加规则，只允许本组内的主机可以通过HTTP访问到虚拟机实例
+6.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：建立安全组
+
+
+图15
+2）允许ssh访问，如图-16
+
+图-16
+3）允许HTTPS访问，如图-17所示：
+
+图-17
+7 案例7：创建云主机
+7.1 问题
+
+本案例要求：
+使用m2.tiny云主机类型
+将云主机加入到内部网络
+设置安全规则，允许外界ping通云主机
+设置外界可以ssh到云主机
+7.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：创建云主机
+
+1）创建云主机，如图-18所示：
+
+图-18
+
+图-19
+4）云主机类型，如图-20所示：
+
+图-20
+5）云主机网络，如图-21所示：
+
+图-21
+步骤二：设置安全组规则，允许外界ping通云主机
+
+1）添加规则，如图-22所示：
+
+图-22
+2）增加ping规则，如图-23所示
+
+图-23
+7）进入控制台，配置dns的ip为172.40.1.10，浮动ip在案例5已经设置，这里不再重复，通过浮动ip可以ssh连接，如图-24所示：
+
+图-24
+8 案例8：安装额外计算节点
+8.1 问题
+
+本案例要求安装额外的计算节点：
+添加两块网卡，均能与第一个节点通信
+能够准确地进行DNS解析
+配置yum仓库
+安装计算节点
+8.2 步骤
+
+实现此案例需要按照如下步骤进行。
+步骤一：安装计算节点
+
+备注：day02的案例里面在安装openstack时，nova.tedu.cn已经配置过网卡，DNS解析，yum源，这里不再赘述，不会的可以看day02的案例
+1）更改answer.ini文件
+[root@openstack ~]# vi answer.ini        //在openstack.tedu.cn上面操作
+CONFIG_COMPUTE_HOSTS=192.168.1.1,192.168.1.2
+CONFIG_NETWORK_HOSTS=192.168.1.1,192.168.1.2
+[root@openstack ~]# packstack --answer-file answer.ini
+**** Installation completed successfully ******
+2）这时浏览器访问时不出现页面，15-horizon_vhost.conf文件被还原，需要重新修改这个文件
+[root@openstack ~]# cd /etc/httpd/conf.d/
+[root@openstack conf.d]# vi 15-horizon_vhost.conf
+     35   WSGIProcessGroup apache
+     36   WSGIApplicationGroup %{GLOBAL}     //添加这一行
+[root@openstack conf.d]# apachectl  graceful  //重新载入配置文件
+3）浏览器访问，出现页面
+[root@openstack conf.d]# firefox 192.168.1.1
+[root@localhost conf.d]# cd
+[root@localhost ~]# ls
+answer.ini   keystonerc_admin   
+[root@openstack ~]# cat keystonerc_admin   
+unset OS_SERVICE_TOKEN
+    export OS_USERNAME=admin
+    export OS_PASSWORD=1bb4c987345c45ba
+4）安装后的节点状态，如图-25所示：
+
+图-25
+5）云主机热迁移，如图-26所示：
+
+图-26
+热迁移选择，如图-27所示：
+
+图-27
+迁移状态，如图-28所示：
+
+图-28
+迁移结果，如图-29所示：
+
+图-29
+openstack错误分析：
+1）进入控制台不显示内容，如图-30所示：
+
+图-30
+解决办法：可以换一个云主机类型（m1.tiny）
+2）若出现云主机处于错误状态，如图-31所示：
+
+图-31
+解决办法：可能是内网出现了问题，检查内网，或者把内网删除（不会建立的可以参考案例4），重新建立，之后重新启动openstack
+[root@openstack ~]# systemctl restart openstack-nova-compute
+3）云主机热迁移失败
+

@@ -1,0 +1,158 @@
+Top
+NSD PROJECT1 DAY05
+
+案例1：STP的基本配置
+案例2：配置阻塞端口
+案例3：STP配置
+案例4：三层交换配置HSRP
+案例5：完善网络负载均衡
+1 案例1：STP的基本配置
+1.1 问题
+
+按照图-1所示拓扑结构，将S1配置成vlan1的主根，将S2配置成vlan2的次根
+
+图-1
+1.2 步骤
+
+1，在Switch1中配置
+Switch(config)#spanning-tree vlan 1 priority 24576
+或
+Switch(config)#spanning-tree vlan 1 root primary
+2，在Switch2中配置
+Switch(config)#spanning-tree vlan 1 priority 28672
+或
+Switch(config)#spanning-tree vlan 1 root secondary
+2 案例2：配置阻塞端口
+2.1 问题
+
+按照图-2拓扑结构所示，通过配置生成树协议，按照拓扑需求阻塞相应端口
+
+图-2
+2.2 步骤
+
+1，在Switch3中配置
+Switch(config)#spanning-tree vlan 1 root primary
+2，在Switch1中配置
+Switch(config)#spanning-tree vlan 1 root secondary
+3 案例3：STP配置
+3.1 问题
+
+通过配置PVST+实现MS1负责转发VLAN1的数据，MS2负责转发VLAN2的数据
+按照图-3所示拓扑结构，配置MS1为vlan1的主根，vlan2的次根，配置SM2位vlan1的次根，vlan2的主根
+
+图-3
+3.2 步骤
+
+1，在所有交换机中创建vlan2
+Switch(config)#vlan 2
+2，将拓扑中所有交换机之间都配置为中继链路
+MS1
+Switch(config)#interface range fastEthernet 0/1-3
+Switch(config-if-range)#switchport trunk encapsulation dot1q
+Switch(config-if-range)#switchport mode trunk
+MS2
+Switch(config)#interface range fastEthernet 0/1-3
+Switch(config-if-range)#switchport trunk encapsulation dot1q
+Switch(config-if-range)#switchport mode trunk
+Switch1
+Switch(config)#interface range fastEthernet 0/1-2
+Switch(config-if-range)#switchport mode trunk
+Switch2
+Switch(config)#interface range fastEthernet 0/1-2
+Switch(config-if-range)#switchport mode trunk
+3，在MS1中配置
+Switch(config)#spanning-tree vlan 1 root primary 
+Switch(config)#spanning-tree vlan 2 root secondary
+4，在MS2中配置
+Switch(config)#spanning-tree vlan 2 root primary 
+Switch(config)#spanning-tree vlan 1 root secondary
+4 案例4：三层交换配置HSRP
+4.1 问题
+
+按照图-4所示拓扑结构，在三层交换机配置热备份路由协议使组内两个出口设备共享一个虚拟ip地址192.168.1.254为内网主机的网关
+
+图-4
+4.2 步骤
+
+本实验暂不考虑NAT问题。
+1，为所有pc设备配置ip与网关，内网主机网关为192.168.1.254
+外网主机网关为192.168.4.1
+2，为所有网络设备配置接口的ip地址
+路由器
+Router(config)#interface gigabitEthernet 0/0
+Router(config-if)#ip address 192.168.2.1 255.255.255.0
+Router(config-if)#no shutdown
+Router(config)#interface gigabitEthernet 0/1
+Router(config-if)#ip address 192.168.3.1 255.255.255.0
+Router(config-if)#no shutdown
+Router(config)#interface gigabitEthernet 0/2
+Router(config-if)#ip address 192.168.4.1 255.255.255.0
+Router(config-if)#no shutdown
+MS1
+Switch(config)#interface fastEthernet 0/1
+Switch(config-if)#no switchport 
+Switch(config-if)#ip address 192.168.2.2 255.255.255.0
+Switch(config)#interface vlan 1
+Switch(config-if)#ip address 192.168.1.252 255.255.255.0
+Switch(config-if)#no shutdown
+MS2
+Switch(config)#interface fastEthernet 0/1
+Switch(config-if)#no switchport 
+Switch(config-if)#ip address 192.168.3.2 255.255.255.0
+Switch(config)#interface vlan 1
+Switch(config-if)#ip address 192.168.1.253 255.255.255.0
+Switch(config-if)#no shutdown
+3，配置动态路由技术使全网互通
+路由器
+Router(config)#router ospf 1
+Router(config-router)#network 192.168.4.0 0.0.0.255 area 0
+Router(config-router)#network 192.168.3.0 0.0.0.255 area 0
+Router(config-router)#network 192.168.2.0 0.0.0.255 area 0
+MS1
+Switch(config)#ip routing
+Switch(config)#router ospf 1
+Switch(config-router)#network 192.168.1.0 0.0.0.255 area 0
+Switch(config-router)#network 192.168.2.0 0.0.0.255 area 0
+MS2
+Switch(config)#ip routing
+Switch(config)#router ospf 1
+Switch(config-router)#network 192.168.1.0 0.0.0.255 area 0
+Switch(config-router)#network 192.168.3.0 0.0.0.255 area 0
+5 案例5：完善网络负载均衡
+5.1 问题
+
+通过之前配置的STP加上HSRP完善网络的负载均衡功能。
+按照图-5所示拓扑结构，配置MS1为vlan1的活跃路由器、vlan2的备份路由器，MS为vlan1的备份路由器、vlan2的备份路由器，实现负载均衡的效果
+
+图-5
+5.2 步骤
+
+注意：此实验需要在 练习3 的基础之上进行配置
+1，先配置两台三层交换机的ip地址
+MS1
+Switch(config)#interface vlan 1
+Switch(config-if)#ip address 192.168.1.252 255.255.255.0
+Switch(config-if)#no shutdown
+Switch(config)#interface vlan 2
+Switch(config-if)#ip address 192.168.2.252 255.255.255.0
+MS2
+Switch(config)#interface vlan 1
+Switch(config-if)#ip address 192.168.1.253 255.255.255.0
+Switch(config-if)#no shutdown
+Switch(config)#interface vlan 2
+Switch(config-if)#ip address 192.168.2.253 255.255.255.0
+2，开启热备份功能
+MS1
+Switch(config)#interface vlan 1
+Switch(config-if)#standby 1 ip 192.168.1.254
+Switch(config-if)#standby 1 priority 105
+Switch(config-if)#standby 1 preempt
+Switch(config)#interface vlan 2
+Switch(config-if)#standby 2 ip 192.168.2.254
+MS2
+Switch(config)#interface vlan 1
+Switch(config-if)#standby 1 ip 192.168.1.254
+Switch(config)#interface vlan 2
+Switch(config-if)#standby 2 ip 192.168.2.254
+Switch(config-if)#standby 2 priority 105
+Switch(config-if)#standby 2 preempt
